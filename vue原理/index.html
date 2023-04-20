@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<style>
+    .container{
+        border: 1px solid #000;
+        border-radius: 20px;
+        width: 500px;
+        margin: 100px auto;
+        text-align: center;
+    }
+    .active{
+        visibility: hidden;
+    }
+    .minusBtn{
+        border-radius: 50%;
+    }
+    .addBtn{
+        border-radius: 50%;
+    }
+</style>
+<body>
+    <div class="container">
+        <h1 class="head">{{title}}</h1>
+        <div class="list">
+            <div v-for="item in goods" class="list-item">
+                <div class="title">{{item.title}}</div>
+                <div class="controls">
+                    <button @click="item.choose--" class="minusBtn" :class="{active: item.choose <= 0}">-</button>
+                    <span v-show="item.choose > 0">{{item.choose}}</span>
+                    <button @click="item.choose++" class="addBtn">+</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="car">
+                <i class="iconfont i-gouwuchefill"></i>
+                <span class="badge">{{count}}</span>
+            </div>
+        </div>
+
+
+</body>
+
+<script type="module">
+    const {
+        createApp
+    } = Vue
+
+    import goods from './js/data.js'
+    const vm = createApp({
+        data() {
+            return {
+                title: '淘东手机',
+                goods,
+            }
+        },
+        computed:{
+            count: function() {
+                let sum = 0;
+                for (let i = 0; i < goods.length; i++) {
+                    sum += this.goods[i].choose;
+                    
+                }
+                return sum
+            }
+        }
+    })
+
+    vm.mount('.container')
+</script>
+
+</html>
