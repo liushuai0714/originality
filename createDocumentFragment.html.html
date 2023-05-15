@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <style type="text/css">
+        #outer{ height: 200px; border: 1px solid #006400;}
+    </style>
+</head>
+<body>
+<div id="outer">
+</div>
+<input type="button" value="createElement" id="btn_1"/><input type="button" value="createDocumentFragment" id="btn_2"/>
+<script type="text/javascript">
+    function $(id){
+        return document.getElementById(id);
+    }
+    var outer = $('outer');
+    var inner = $('inner'); 
+    $('btn_1').onclick = function(){
+        var div = document.createElement('div');
+            div.innerHTML = '<p>测试createElement</p>';
+        document.body.appendChild(div);
+        setTimeout(function(){
+            outer.appendChild(div);
+            setTimeout(function(){
+                outer.removeChild(div);
+            },1000)
+        },1000)
+    }
+    $('btn_2').onclick = function(){
+        var p = document.createElement('p');
+            p.innerHTML = '测试DocumentFragment';
+        var fragment = document.createDocumentFragment();
+            fragment.appendChild(p);
+            fragment.innerHTML = '<p>测试DocumentFragment</p>';
+            fragment.innerHTML = '<span>测试DocumentFragment</span>';
+        document.body.appendChild(fragment);
+        setTimeout(function(){
+            outer.appendChild(fragment);//报错，因为此时文档内部已经能够不存在fragment了
+            setTimeout(function(){
+                outer.removeChild(fragment);
+            },1000)
+        },1000)
+    }
+</script>
+</body>
+</html>

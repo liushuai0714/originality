@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钉钉官网动画效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        .header,
+        .footer {
+            height: 100vh;
+            font-size: 4rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .playground {
+            height: 4000px;
+            background-color: black;
+        }
+
+        .animation-container {
+            position: sticky;
+            height: 100vh;
+            top: 0;
+        }
+
+        .animation-container .list {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            /* 长宽比 */
+            aspect-ratio: 2/1;
+            border-radius: 10px;
+            display: grid;
+            /* 表示创建7个大小相等的列 */
+            grid-template-columns: repeat(7, 1fr);
+            /* 表示创建2个大小相等的行 */
+            grid-template-rows: repeat(2, 1fr);
+            /* x轴和Y轴居中对齐 */
+            place-items: center;
+        }
+
+        .animation-container .list .list-item {
+            width: 50%;
+            aspect-ratio: 1/1;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        .list-item:nth-child(3n + 1) {
+            background: linear-gradient(#3e90f7, #246bf6);
+        }
+
+        .list-item:nth-child(3n + 2) {
+            background: linear-gradient(#53b655, #469c50);
+        }
+
+        .list-item:nth-child(3n + 3) {
+            background: linear-gradient(#f3a93c, #f4ad3d);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">HEADER</div>
+    <div class="playground">
+        <div class="animation-container">
+            <div class="list">
+                <div data-order="0" class="list-item"></div>
+                <div data-order="1" class="list-item"></div>
+                <div data-order="2" class="list-item"></div>
+                <div data-order="3" class="list-item"></div>
+                <div data-order="2" class="list-item"></div>
+                <div data-order="1" class="list-item"></div>
+                <div data-order="0" class="list-item"></div>
+                <div data-order="0" class="list-item"></div>
+                <div data-order="1" class="list-item"></div>
+                <div data-order="2" class="list-item"></div>
+                <div data-order="3" class="list-item"></div>
+                <div data-order="2" class="list-item"></div>
+                <div data-order="1" class="list-item"></div>
+                <div data-order="0" class="list-item"></div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">FOOTER</div>
+    <script>
+        const items = document.querySelectorAll(".list-item")
+        const playground = document.querySelector('.playground')
+        const list = document.querySelector('.list')
+
+        //创建动画函数
+        function createAnimation(scrollStart, scrollEnd, valueStart, valueEnd) {
+            return function (scroll) {
+                if (scroll <= scrollStart) {
+                    return valueStart;
+                }
+                if (scroll >= scrollEnd) {
+                    return valueEnd
+                }
+                return valueStart + (valueEnd - valueStart) * ((scroll - scrollStart) / (scrollEnd - scrollStart));
+            }
+        }
+
+        const animationMap = new Map();
+
+        //获取控制动画的对象
+        function getDomAnimation(scrollStart, scrollEnd, dom) {
+            //自定义属性 使小方块出现的时间不同
+            scrollStart = scrollStart + dom.dataset.order * 600
+
+            //先创建动画
+            //透明度
+            const opacityAnimation = createAnimation(scrollStart, scrollEnd, 0, 1);
+            //放大缩小
+            const scaleAnimation = createAnimation(scrollStart, scrollEnd, 0.5, 1)
+
+            //对应的函数
+            const opacity = function (scroll) {
+                return opacityAnimation(scroll)
+            }
+            //横向和纵向的移动
+            const xAnimation = createAnimation(scrollStart, scrollEnd, list.clientWidth / 2 - dom.offsetLeft - dom
+                .clientWidth / 2, 0)
+            const yAnimation = createAnimation(scrollStart, scrollEnd, list.clientHeight / 2 - dom.offsetTop - dom
+                .clientHeight / 2, 0)
+
+            const transform = function (scroll) {
+                return `translate(${xAnimation(scroll)}px, ${yAnimation(scroll)}px) scale(${scaleAnimation(scroll)})`
+            }
+            return {
+                opacity,
+                transform,
+            }
+        }
+
+        function updateAnimationMap() {
+            //先清空map 窗口改变大小会影响数值
+            animationMap.clear();
+            //获取playground位置信息
+            const playGroundRect = playground.getBoundingClientRect()
+            //浏览器滚动位置
+            const scrollY = window.scrollY;
+            //动画开始和结束
+            const scrollStart = playGroundRect.top + scrollY;
+            const scrollEnd = playGroundRect.bottom + scrollY - window.innerHeight;
+            for (const item of items) {
+                //遍历items item做key style属性做value 添加到map中
+                animationMap.set(item, getDomAnimation(scrollStart, scrollEnd, item))
+            }
+        }
+
+        updateAnimationMap()
+
+        //更新动画
+        function updateStyles() {
+            const scrollY = window.scrollY;
+            for (let [dom, value] of animationMap) {
+                for (const cssProp in value) {
+                    dom.style[cssProp] = value[cssProp](scrollY)
+                }
+            }
+        }
+        // console.log(animationMap);
+
+        updateStyles()
+        window.addEventListener('scroll', updateStyles)
+        //监听浏览器窗口
+        window.addEventListener('resize', () => {
+            updateAnimationMap();
+            updateStyles();
+        });
+    </script>
+</body>
+
+</html>
