@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="box"></div>
+    <script>
+        //防抖共用函数
+        function debounce(func, duration = 500) {
+            let timer = null;
+            return function (...args) {
+                clearTimeout(timer)
+                timer = setTimeout(() => {
+                    func.apply(this, args)
+                }, duration);
+            }
+        }
+        const div = document.getElementById('box')
+
+        window.addEventListener('mousemove', debounce(function (e) {
+            // div.innerHTML = `clientX:${e.clientX} clientY:${e.clientY}`
+            div.innerHTML = `screenX:${e.screenX} screenY:${e.screenY}`
+        }), 100)
+
+// window.onresize = d_layout
+    </script>
+</body>
+
+</html>
